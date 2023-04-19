@@ -1,0 +1,11 @@
+[package]
+name = "regex-patt"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+ratelimit = "0.5.1"
+regex = "1.7.3"
+unicode-normalization = "0.1.22"
