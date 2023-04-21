@@ -8,4 +8,5 @@ edition = "2021"
 [dependencies]
 ratelimit = "0.5.1"
 regex = "1.7.3"
+rustrict = "0.7.4"
 unicode-normalization = "0.1.22"

@@ -1,5 +1,6 @@
 use std::{fs::File, io::{BufReader, BufRead}};
 
+use rustrict::{CensorStr, CensorIter};
 use regex::Regex;
 use unicode_normalization::{IsNormalized, UnicodeNormalization};
 use ratelimit::*;
@@ -39,6 +40,14 @@ fn regex_pattern_match(username: &str) -> bool {
     true
 }
 
+fn censor_username(username: &str) -> bool {
+    if username.is_inappropriate() {
+        println!("Username {} | is inappropriate", username);
+        return false
+    }
+    username.is_inappropriate()
+}
+
 fn read_file(file_name: &str) -> Vec<String> {
 
     let mut list = Vec::new();
@@ -52,16 +61,13 @@ fn read_file(file_name: &str) -> Vec<String> {
 
 fn main() {
 
-    // create a list of usernames
-    let _usernames = vec![
-        "test",
-        "ℌ",
-        "ℍ",
-        "ÅEΩLI",
-        "007",
-        "Äffin",
-        "Äffinjsafdsajfsajf",
-    ].iter().map(|&s| s.to_string()).collect::<Vec<String>>();
+    let test_one = "Hello, f4gg0t!!!";
+    let test_two = "fAcKing";
+    let censored: String = "Hello, f4gg0t!!!".censor();
+    let inappropriate: bool = "fAcKing".is_inappropriate();
+
+    println!("Censored: {} -> {}", censored, test_one);
+    println!("Inappropriate: {} -> {}", inappropriate, test_two);
 
     // verify usernames
     let usernames = vec![
@@ -79,18 +85,35 @@ fn main() {
         "Äffinjsafdsajfsajf",
     ].iter().map(|&s| verify_username(s)).collect::<Vec<bool>>();
 
-    // verify_username(test);
+
+    println!("====================");
 
     // check weak passwords
     let weak_passwords = read_file("weakpasswords.txt");
-    for pass in weak_passwords {
+    for pass in weak_passwords.clone() {
         verify_username(pass.as_str());
     }
+    println!("====================");
+
+    // Censorship
+    for pass in weak_passwords {
+        censor_username(pass.as_str());
+    }
+
+    println!("====================");
 
     // check breached passwords
     let breached_passwords = read_file("breachedpasswords.txt");
-    for pass in breached_passwords {
-        // verify_password(pass.as_str());
+    for pass in breached_passwords.clone() {
+        verify_username(pass.as_str());
     }
+
+    println!("====================");
+
+    // censorship breached passwords
+    for pass in breached_passwords {
+        censor_username(pass.as_str());
+    }
+    println!("====================");
     
 }
