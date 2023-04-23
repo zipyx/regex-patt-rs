@@ -55,20 +55,6 @@ fn verify_password(password: &str) -> password_obj {
             message: "password length is not met".to_string(),
         }
     }
-    // if check_password_length && (breached_passwords.contains(password) ||
-    // weak_passwords.contains(password))
-    // {
-    //     return password_obj {
-    //         username: password.to_string(),
-    //         validity: true,
-    //     }
-    // } else {
-    //     password_obj {
-    //         username: password.to_string(),
-    //         validity: false,
-    //     }
-    // }
-
 }
 
 /// Verifying username with regex + unicode normalization
