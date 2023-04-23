@@ -71,6 +71,7 @@ fn verify_password(password: &str) -> password_obj {
 
 }
 
+/// Verifying username with regex + unicode normalization
 fn verify_username(username: &str) -> bool {
     
     // normalize the username
