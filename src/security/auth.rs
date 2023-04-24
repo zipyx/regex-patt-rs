@@ -1,4 +1,4 @@
-use bcrypt::{verify, hash_with_salt, DEFAULT_COST};
+use bcrypt::{verify, hash_with_salt, DEFAULT_COST, HashParts};
 use regex::Regex;
 use rustrict::CensorStr;
 use unicode_normalization::UnicodeNormalization;
@@ -7,13 +7,14 @@ use rand::Rng;
 use super::util::{read_file_hashset, read_file};
 
 /// Struct password object
-struct Password_Object {
+pub struct Password_Object {
     // username: String,
     validity: bool,
     message: String,
 }
 
-fn generate_salt() -> [u8; 16] {
+/// Generate salt for password hash function
+pub fn generate_salt() -> [u8; 16] {
 
     // Generate random salt, to be stored in database column
     let mut salt: [u8; 16] = [0; 16];
@@ -21,34 +22,40 @@ fn generate_salt() -> [u8; 16] {
     salt
 }
 
-fn hash_password(password: String) -> String {
+/// Compare password with hash to verify if it is correct
+pub fn compare_password(password: String, hash: String) -> bool {
+    verify(password, hash.to_string().as_str()).unwrap()
+}
+
+/// Generate a suitable password from plain text 
+pub fn generate_password(password: String) -> String {
 
     const PEPPER: &str = "PkCt&farjdWL2&WTaoddA2u7S4hfxDkbtNFxxU92";
+    let result = password + PEPPER;
+    result
+}
 
-    // Clone the password into bytes to be concatenated with the pepper
-    let mut extended_password: String = password
-        .clone()
-        .as_bytes()
-        .iter()
-        .map(|x| x.to_string())
-        .collect();
+/// Hash function that takes in a single input being the password 
+/// and returns a string
+pub fn hash_password(password: String) -> String {
 
-    // Connect the password with the pepper 
-    extended_password.extend(PEPPER.as_bytes().iter().map(|x| x.to_string()));
+    let salt = generate_salt();
+    let generated_password = generate_password(password.clone());
 
     // Convert extended password to bytes and begin hashing with salt
-    let hash = hash_with_salt(extended_password.as_bytes(), DEFAULT_COST, generate_salt()).unwrap();
+    let hash = hash_with_salt(generated_password.clone(), DEFAULT_COST, salt).unwrap();
 
     // Confirm hash
-    // match self.compare_password(password, hash)
+    let result = compare_password(generated_password, hash.to_string());
+    println!("Hash result: {}", result);
 
-    hash.to_string()
+    hash.to_string().clone()
 }
 
 
 /// Verify Password by taking in a single parameter being that of password 
 /// - passowrd : &str
-fn verify_password(password: &str) -> Password_Object {
+pub fn verify_password(password: &str) -> Password_Object {
 
     // check password length
         let check_password_length = password.len() >= 8 && password.len() <= 64;
@@ -91,7 +98,7 @@ fn verify_password(password: &str) -> Password_Object {
 }
 
 /// Verifying username with regex + unicode normalization
-fn verify_username(username: &str) -> bool {
+pub fn verify_username(username: &str) -> bool {
     
     // normalize the username
     let normalized = username.nfkd().nfkc().nfd().filter(|c| c.is_alphanumeric()).collect::<String>();
@@ -108,7 +115,7 @@ fn verify_username(username: &str) -> bool {
 }
 
 /// Regex pattern matching for username, this is very slow do not use this.
-fn regex_pattern_match(username: &str) -> bool {
+pub fn regex_pattern_match(username: &str) -> bool {
     let regex_patterns = read_file("regex.txt");
     for pattern in regex_patterns {
         let re = Regex::new(pattern.as_str()).unwrap();
@@ -122,7 +129,7 @@ fn regex_pattern_match(username: &str) -> bool {
 
 /// Censore username checker - not really needed but good 
 /// modulation of code.
-fn censor_username(username: &str) -> bool {
+pub fn censor_username(username: &str) -> bool {
 
     // impl rate limit
     // (burst, rate, seconds)

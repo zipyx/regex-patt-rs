@@ -4,6 +4,8 @@ use rustrict::CensorStr;
 use ratelimit::*;
 use clocksource::{DateTime, SecondsFormat};
 
+use crate::security::auth::Password_Object;
+
 /// Check timer for rate limiter
 fn rate_limiter() {
 
@@ -32,13 +34,19 @@ fn rate_limiter() {
 fn main() {
 
     let username = "something";
-    let password = "$2y$12$C4st7WVSU6nPOTip/leWP.qcPCAOoiIKHEJ5.SbkrCVJ0dlbuwGxm";
+    let password = "something";
 
-    let _censored: String = "Hello, f4gg0t!!!".censor();
-    let _inappropriate: bool = "fAcKing".is_inappropriate();
+    let x = security::auth::hash_password(password.to_string());
+    let generated_password = security::auth::generate_password(password.to_string());
+    let username_response: bool = security::auth::verify_username(username);
+    let password_response: bool = security::auth::compare_password(generated_password, x.clone());
 
-    // println!("Censored: {} -> {}", censored, test_one);
-    // println!("Inappropriate: {} -> {}", inappropriate, test_two);
 
+    println!("#################################################################");
+    println!("Username: {} validation result -> {}", username, username_response);
+    println!("#################################################################");
+    println!("Hash Password: {}", x.clone());
+    println!("#################################################################");
+    println!("Password: {} validation result -> {}", password, password_response);
     
 }
